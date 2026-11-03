@@ -1,66 +1,206 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Entrar · EcoQuest</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap"><link rel="stylesheet" href="css/style.css"></head><body><header id="topo"></header>
-<main class="wrap estreito"><section class="cartao">
-  <h1>Identificação</h1>
-  <p>Sem senha: enviamos um código para o seu e-mail.</p>
-  <div class="abas"><button id="aba-novo" class="ativa">Primeiro acesso</button><button id="aba-login">Já tenho cadastro</button></div>
-  <form id="f1">
-    <label id="l-nome">Nome completo<input id="nome" required minlength="3" autocomplete="name"></label>
-    <label>E-mail<input id="email" type="email" required autocomplete="email"></label>
-    <button class="btn" id="b1">Continuar</button>
-  </form>
-  <form id="f2" hidden>
-    <p>Enviamos um código para <b id="alvo"></b>. Digite-o abaixo.</p>
-    <label>Código de confirmação<input id="codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="10" required></label>
-    <button class="btn" id="b2">Confirmar código</button>
-    <button type="button" class="link" id="trocar">Usar outro e-mail</button>
-  </form>
-  <p id="msg" role="alert"></p>
-</section></main>
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Entrar · EcoQuest</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header id="topo"></header>
+
+<main class="wrap estreito">
+  <section class="cartao">
+
+    <h1>Identificação</h1>
+    <p>Entre ou crie sua conta para participar do EcoQuest.</p>
+
+    <div class="abas">
+      <button type="button" id="aba-novo" class="ativa">
+        Primeiro acesso
+      </button>
+
+      <button type="button" id="aba-login">
+        Já tenho cadastro
+      </button>
+    </div>
+
+    <form id="f1">
+
+      <label id="l-nome">
+        Nome completo
+        <input
+          id="nome"
+          required
+          minlength="3"
+          autocomplete="name"
+        >
+      </label>
+
+      <label>
+        E-mail
+        <input
+          id="email"
+          type="email"
+          required
+          autocomplete="email"
+        >
+      </label>
+
+      <label>
+        Senha
+        <input
+          id="senha"
+          type="password"
+          required
+          minlength="6"
+          autocomplete="new-password"
+        >
+      </label>
+
+      <button class="btn" id="b1" type="submit">
+        Criar conta
+      </button>
+
+    </form>
+
+    <p id="msg" role="alert"></p>
+
+  </section>
+</main>
+
 <script type="module">
+
 import { supabase } from './js/supabase.js';
 import { montarCabecalho } from './js/layout.js';
+
 montarCabecalho();
+
 const $ = id => document.getElementById(id);
-const msg = (t, ok) => { $('msg').textContent = t; $('msg').className = ok ? 'ok' : ''; };
-let modo = 'novo', email = '';
+
+const msg = (t, ok = false) => {
+  $('msg').textContent = t;
+  $('msg').className = ok ? 'ok' : '';
+};
+
+let modo = 'novo';
 
 function aba(m) {
-  modo = m; msg('');
-  $('aba-novo').classList.toggle('ativa', m === 'novo'); $('aba-login').classList.toggle('ativa', m === 'login');
-  $('l-nome').hidden = m === 'login'; $('nome').required = m === 'novo';
+
+  modo = m;
+  msg('');
+
+  $('aba-novo').classList.toggle('ativa', m === 'novo');
+  $('aba-login').classList.toggle('ativa', m === 'login');
+
+  $('l-nome').hidden = m === 'login';
+  $('nome').required = m === 'novo';
+
+  $('senha').autocomplete =
+    m === 'novo' ? 'new-password' : 'current-password';
+
+  $('b1').textContent =
+    m === 'novo' ? 'Criar conta' : 'Entrar';
+
 }
-$('aba-novo').onclick = () => aba('novo'); $('aba-login').onclick = () => aba('login');
-$('trocar').onclick = () => { $('f2').hidden = true; $('f1').hidden = false; msg(''); };
 
-// Passo 1: pede o código
+$('aba-novo').onclick = () => aba('novo');
+$('aba-login').onclick = () => aba('login');
+
+// Cadastro e login
 $('f1').onsubmit = async (e) => {
-  e.preventDefault(); msg(''); $('b1').disabled = true;
-  email = $('email').value.trim().toLowerCase();
+
+  e.preventDefault();
+
+  msg('');
+  $('b1').disabled = true;
+
+  const email = $('email').value.trim().toLowerCase();
+  const senha = $('senha').value;
   const nome = $('nome').value.trim();
+
   try {
+
     if (modo === 'novo') {
-      const { data: existe, error } = await supabase.rpc('email_cadastrado', { p_email: email });
+
+      if (nome.length < 3) {
+        return msg('Digite seu nome completo.');
+      }
+
+      const { data, error } = await supabase.auth.signUp({
+
+        email,
+        password: senha,
+
+        options: {
+          data: { nome }
+        }
+
+      });
+
       if (error) throw error;
-      if (existe) return msg('Este e-mail já tem cadastro. Use a aba "Já tenho cadastro".');
+
+      if (!data.session) {
+        return msg(
+          'Conta criada, mas não foi possível iniciar a sessão. Confira a configuração de confirmação de e-mail no Supabase.'
+        );
+      }
+
+      msg('Cadastro realizado com sucesso!', true);
+
+    } else {
+
+      const { error } = await supabase.auth.signInWithPassword({
+
+        email,
+        password: senha
+
+      });
+
+      if (error) throw error;
+
+      msg('Login realizado com sucesso!', true);
+
     }
-    const { error } = await supabase.auth.signInWithOtp({
-      email, options: modo === 'novo' ? { shouldCreateUser: true, data: { nome } } : { shouldCreateUser: false },
-    });
-    if (error) return msg(modo === 'login' && /signups/i.test(error.message)
-      ? 'Não encontramos esse e-mail. Faça o primeiro acesso.' : 'Não foi possível enviar o código: ' + error.message);
-    $('alvo').textContent = email; $('f1').hidden = true; $('f2').hidden = false; $('codigo').focus();
-    msg('Código enviado. Confira também a caixa de spam.', true);
-  } catch (err) { msg('Erro: ' + err.message); }
-  finally { $('b1').disabled = false; }
+
+    const voltar = new URLSearchParams(location.search).get('voltar');
+
+    const destino =
+      /^[a-z0-9_-]+\.html$/i.test(voltar || '')
+        ? voltar
+        : 'quiz.html';
+
+    location.href = destino;
+
+  } catch (err) {
+
+    console.error(err);
+
+    if (err.message.includes('already registered')) {
+      msg('Este e-mail já possui cadastro. Utilize a aba de login.');
+    } else if (err.message.includes('Invalid login credentials')) {
+      msg('E-mail ou senha incorretos.');
+    } else if (err.message.includes('Password should be')) {
+      msg('A senha não atende aos requisitos mínimos.');
+    } else {
+      msg('Não foi possível realizar a operação: ' + err.message);
+    }
+
+  } finally {
+
+    $('b1').disabled = false;
+
+  }
+
 };
 
-// Passo 2: confere o código e entra
-$('f2').onsubmit = async (e) => {
-  e.preventDefault(); msg(''); $('b2').disabled = true;
-  const { error } = await supabase.auth.verifyOtp({ email, token: $('codigo').value.trim(), type: 'email' });
-  $('b2').disabled = false;
-  if (error) return msg('Código incorreto ou expirado. Peça um novo em "Usar outro e-mail".');
-  const voltar = new URLSearchParams(location.search).get('voltar');
-  location.href = /^[a-z]+\.html$/.test(voltar || '') ? voltar : 'quiz.html';
-};
-</script></body></html>
+</script>
+
+</body>
+</html>
