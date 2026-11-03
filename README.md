@@ -1,46 +1,74 @@
-# EcoQuest
+# 🌍 EcoQuest - Guia do Projeto
 
-Site em HTML + CSS + JavaScript puro (sem instalar nada) com Supabase para login por código de e-mail, banco de dados e envio do resultado.
+Este é o repositório do projeto **EcoQuest**, um site sobre sustentabilidade desenvolvido em HTML, CSS e JavaScript puro (sem frameworks). O sistema conta com autenticação de usuários, banco de dados relacional e um painel administrativo integrados à nuvem.
 
-```
-index.html      painel com os cards       conteudo.html  apresentação / vídeo / leitura
-cadastro.html   cadastro e login (código) quiz.html      quiz + resultado
-admin.html      painel administrativo     css/style.css  visual (paleta no topo)
-js/data.js      ★ conteúdos e perguntas (edite aqui)     js/supabase.js ★ suas chaves
-supabase/schema.sql   tabelas e segurança    supabase/functions/enviar-resultado   e-mail do resultado
-```
+---
 
-## 1. Banco de dados
-1. Crie um projeto grátis em supabase.com.
-2. **SQL Editor** > cole `supabase/schema.sql` > **Run**.
-3. Rode também: `insert into public.admins (email) values ('seu-email@exemplo.com');` (use o e-mail com que você vai entrar no painel).
-4. **Project Settings > API**: copie *Project URL* e a chave *anon/publishable* para `js/supabase.js`.
+## 🛠️ O que já foi feito (Infraestrutura Pronta)
 
-## 2. Validação de e-mail por código
-O Supabase manda um link por padrão; queremos o **código**. Em **Authentication > Emails > Templates**, edite os DOIS modelos, **Confirm signup** (primeiro acesso) e **Magic Link** (login), e inclua `{{ .Token }}` no texto, por exemplo:
-`<p>Seu código do EcoQuest: <b>{{ .Token }}</b></p>`
+1. **Interface do Site:** Páginas principais estruturadas (`index.html`, `cadastro.html`, `conteudo.html`, `quiz.html` e `admin.html`).
+2. **Banco de Dados Conectado:** A estrutura de tabelas (`schema.sql`) já foi criada no banco de dados central.
+3. **Chaves de Acesso:** O arquivo `js/supabase.js` já está configurado com as credenciais do projeto. **Não altere este arquivo**, ele conecta o site de todos ao mesmo banco de dados centralizado.
 
-O e-mail embutido do Supabase tem limite muito baixo de envios por hora. Para valer de verdade, configure um SMTP próprio em **Authentication > Emails > SMTP Settings** (o Resend tem plano grátis).
+---
 
-## 3. Resultado por e-mail (opcional, mas pedido no projeto)
-Com a [Supabase CLI](https://supabase.com/docs/guides/cli) instalada:
-```
-supabase login && supabase link --project-ref SEU_REF
-supabase secrets set RESEND_API_KEY=re_xxx EMAIL_FROM="EcoQuest <contato@seudominio.com>"
-supabase functions deploy enviar-resultado
-```
-Sem domínio verificado no Resend, ele só entrega para o seu próprio e-mail (bom para testar). Se a função não estiver publicada, o quiz continua funcionando e avisa que o e-mail não foi enviado.
+## 🚀 Como Rodar o Projeto no seu Computador
 
-## 4. Rodar localmente
-Precisa de um servidor local (abrir o arquivo com duplo clique não funciona com módulos JS):
-```
-python3 -m http.server 5500      # ou use a extensão "Live Server" do VS Code
-```
-Abra http://localhost:5500. Em Authentication > URL Configuration, coloque essa URL em *Site URL*.
+Para testar e editar o site, siga estes passos exatamente nesta ordem:
 
-## 5. Publicar
-Qualquer hospedagem estática serve (Netlify, Vercel, GitHub Pages). Troque o *Site URL* no Supabase pelo endereço final.
+### 1. Clonar ou Baixar o Projeto
+* Clique no botão verde **Code** no topo deste repositório e selecione **Download ZIP** (ou clone via Git se souber usar).
+* Extraia a pasta no seu computador.
 
-## Limitações conhecidas
-- A correção do quiz acontece no navegador (as respostas ficam em `js/data.js`). Para um quiz com prêmio, mova a correção para o servidor.
-- `email_cadastrado` revela se um e-mail já existe (necessário para o aviso de duplicidade).
+### 2. Abrir no VS Code
+* Abra o seu **Visual Studio Code**.
+* Vá em *File > Open Folder* (Arquivo > Abrir Pasta) e selecione a pasta descompactada do projeto.
+* Se o VS Code perguntar se você confia nos autores, clique em **Yes, I trust the authors**.
+
+### 3. Instalar a Extensão "Live Server"
+* No menu lateral esquerdo do VS Code, clique no ícone de **Extensões** (o quadrado que se divide em quatro blocos) ou aperte `Ctrl + Shift + X`.
+* Busque por **Live Server** (desenvolvido por *Ritwick Dey*) e clique em **Install**.
+
+### 4. Iniciar o Site
+* Na barra lateral de arquivos, abra o arquivo `index.html`.
+* No canto inferior direito da barra de status do VS Code, clique no botão **Go Live**.
+* O site abrirá automaticamente no seu navegador no endereço padrão `http://localhost:5500`.
+
+---
+
+## 🗄️ Como Usar o Supabase (Painel do Banco de Dados)
+
+O banco de dados e o sistema de login estão hospedados na nuvem do Supabase. Caso você precise gerenciar os dados do projeto, siga as instruções abaixo:
+
+### 1. Acessar o Projeto
+* Acesse o site [supabase.com](https://supabase.com) e faça login com a conta do criador do projeto.
+* Clique no projeto **EcoQuest** no painel principal.
+
+### 2. Adicionar novos Administradores (Visualmente)
+Para que um novo colega consiga fazer login no painel `admin.html` do site, o e-mail dele precisa estar registrado no banco:
+* Na barra lateral esquerda do Supabase, clique em **Table Editor** (o ícone de uma tabela/grade).
+* Clique na tabela chamada **`admins`**.
+* Clique no botão **"Insert row"** (Inserir linha) no topo da tabela.
+* Digite o e-mail do seu colega no campo correspondente e clique em **Save**. Pronto, ele já pode fazer login!
+
+### 3. Ver as Notas do Quiz e Usuários Cadastrados
+* Ainda no **Table Editor**, você pode clicar nas outras tabelas do sistema para ver as informações em tempo real:
+  * Tabela **`profiles`** ou **`users`**: Mostra os usuários que já se cadastraram no site.
+  * Tabela **`resultados`** (ou nome similar definido no schema): Mostra as respostas, pontuações e quem concluiu o quiz sobre sustentabilidade.
+
+---
+
+## 🔐 Como Fazer Login no Painel Admin do Site
+
+Para testar o fluxo de login no ambiente local:
+1. Acesse a página `cadastro.html` pelo navegador rodando o Live Server.
+2. Insira o seu e-mail (que deve estar previamente cadastrado na tabela `admins` do Supabase).
+3. Verifique a sua caixa de entrada de e-mail para pegar o código de acesso enviado pelo Supabase.
+4. Digite o código na tela do site para validar o seu acesso.
+
+---
+
+## 📂 Organização dos Arquivos
+* `css/style.css` — Estilização visual e paleta de cores.
+* `js/data.js` — Arquivo contendo as perguntas do quiz e conteúdos textuais (edite aqui para mudar as perguntas).
+* `js/supabase.js` — Conexão com o banco de dados (favor manter intacto).
