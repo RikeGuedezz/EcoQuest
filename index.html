@@ -1,0 +1,19 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EcoQuest</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap"><link rel="stylesheet" href="css/style.css"></head><body><header id="topo"></header>
+<section class="hero"><div class="wrap">
+  <h1>Aprenda sobre o meio ambiente e teste o que sabe</h1>
+  <p>O EcoQuest reúne conteúdos sobre oceano, mata e vida urbana. Estude no seu ritmo e depois responda ao quiz para ver quanto você aprendeu.</p>
+  <a class="btn sol" href="quiz.html">Fazer o quiz</a>
+</div></section>
+<main class="wrap"><div class="grade" id="grade"></div></main>
+<script type="module">
+import { montarCabecalho } from './js/layout.js';
+import { cards } from './js/data.js';
+montarCabecalho();
+document.getElementById('grade').innerHTML = cards.map(c => `
+  <article class="cartao card">
+    <div class="arte ${c.tema}" aria-hidden="true">${c.icone}</div>
+    <div class="corpo"><h3>${c.titulo}</h3><p>${c.descricao}</p>
+      <div class="acoes"><a class="btn" href="conteudo.html?id=${c.id}">Estudar aqui</a>
+      <a class="btn contorno" href="${c.url}" target="_blank" rel="noopener">Acessar conteúdo</a></div></div>
+  </article>`).join('');
+</script></body></html>
