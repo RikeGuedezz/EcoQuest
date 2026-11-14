@@ -25,6 +25,8 @@ O EcoQuest recebeu melhorias na navegação, organização dos conteúdos e expe
 - **Apresentação:** substituição do botão de link por uma prévia textual do conteúdo.
 - **Leitura:** melhorias na exibição de textos extensos, com rolagem vertical.
 
+---
+
 ## 🚀 Como Rodar o Projeto no seu Computador
 
 Para testar e editar o site, siga estes passos exatamente nesta ordem:
