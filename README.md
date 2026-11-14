@@ -14,17 +14,28 @@ Este é o repositório do projeto **EcoQuest**, um site sobre sustentabilidade d
 
 **Atualização — 13 de Novembro de 2026**
 
-O EcoQuest recebeu melhorias na navegação, organização dos conteúdos e experiência do usuário.
+# EcoQuest — Atualização do Painel Administrativo
 
-- **Login:** remoção do campo de nome, mantendo apenas e-mail e senha.
-- **Navegação:** remoção de opções redundantes do menu, como "Conteúdos".
-- **Cards de estudo:** agora são totalmente clicáveis e possuem animações de profundidade.
-- **Categorias:** identificação dos conteúdos por Oceanos, Florestas e Meio Urbano.
-- **Quizzes:** criação de opções de desafios separados por categoria.
-- **Vídeo aulas:** incorporação de vídeos diretamente nas páginas de estudo.
-- **Apresentação:** substituição do botão de link por uma prévia textual do conteúdo.
-- **Leitura:** melhorias na exibição de textos extensos, com rolagem vertical.
+## Alterações realizadas
 
+- Reformulação do painel administrativo, dividido em três seções: Visão geral, Ranking e Participantes.
+- Inclusão de indicadores sobre participantes, quizzes realizados, conclusões e média geral.
+- Novo ranking com os 10 melhores participantes, considerando apenas quem concluiu os três desafios.
+- Criação de detalhes individuais com pontuações e histórico de tentativas.
+- Padronização da pontuação dos quizzes de 0 a 100.
+- Cálculo da média geral com base nos três desafios: Oceano, Mata e Urbano.
+- Consideração da melhor tentativa de cada desafio.
+- Atualização do banco de dados para identificar o tema de cada resultado.
+- Melhorias visuais e responsividade para celulares e computadores.
+
+## Arquivos modificados
+
+- `admin.html`
+- `quiz.html`
+- `css/style.css`
+- Banco de dados Supabase.
+
+**Observação:** os resultados antigos foram preservados, mas não entram no novo ranking por não possuírem identificação do desafio.
 ---
 
 ## 🚀 Como Rodar o Projeto no seu Computador
