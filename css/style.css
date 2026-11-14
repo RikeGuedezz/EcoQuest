@@ -48,3 +48,146 @@ input:focus{border-color:var(--agua);outline:none}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--palha);white-space:nowrap}th{color:var(--terra)}
 footer{text-align:center;padding:30px;color:var(--terra);font-size:.9rem}
 @media(max-width:760px){.conteudo{grid-template-columns:1fr}.lateral{flex-direction:row;flex-wrap:wrap}}
+
+
+/* Cartões clicáveis e identificação dos temas */
+.card-link {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.card-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px #73341c24;
+  border-color: #d8c5a8;
+}
+.card-link:active {
+  transform: translateY(-1px) scale(.995);
+  box-shadow: 0 3px 9px #73341c1c;
+}
+.card-link:focus-visible {
+  outline: 3px solid var(--sol);
+  outline-offset: 4px;
+}
+.categoria {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #e8eef2;
+  color: var(--agua);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .055em;
+  line-height: 1.5;
+}
+.categoria-mata { background: #e8eddf; color: #455228; }
+.categoria-urbano { background: #f2e7d7; color: #73341c; }
+.card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: 5px;
+  color: var(--agua);
+  font-weight: 800;
+}
+.card-cta span { transition: transform .2s ease; }
+.card-link:hover .card-cta span,
+.desafio-card:hover .card-cta span { transform: translateX(4px); }
+
+/* Escolha de desafios */
+.quiz-wrap { max-width: 920px; padding-top: 38px; padding-bottom: 48px; }
+.quiz-intro { text-align: center; max-width: 650px; margin: 0 auto; }
+.quiz-intro h1 { margin: 0 0 10px; }
+.quiz-intro p:last-child { margin-top: 0; }
+.desafios { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.desafio-card {
+  color: inherit;
+  text-decoration: none;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.desafio-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px #73341c24;
+  border-color: #d8c5a8;
+}
+.desafio-card:active { transform: translateY(-1px) scale(.995); }
+.desafio-card:focus-visible { outline: 3px solid var(--sol); outline-offset: 4px; }
+.desafio-icone {
+  display: grid;
+  place-items: center;
+  min-height: 142px;
+  font-size: 3.6rem;
+  background: #cfdde6;
+}
+.desafio-mata .desafio-icone { background: #d9e0c6; }
+.desafio-urbano .desafio-icone { background: #ecd9bd; }
+.desafio-card .corpo { min-height: 205px; }
+.desafio-card h2 { margin: 0; font-size: 1.35rem; }
+.desafio-card p { flex: 1; margin: 0; }
+.status-resultado { color: var(--cobre); }
+.video { width: 100%; overflow: hidden; border-radius: 14px; background: #17232b; }
+.video iframe { display: block; }
+
+@media(max-width:760px) {
+  .desafios { grid-template-columns: 1fr; }
+  .desafio-card { display: grid; grid-template-columns: 92px 1fr; }
+  .desafio-icone { min-height: 100%; font-size: 2.5rem; }
+  .desafio-card .corpo { min-height: 0; padding: 16px; }
+  .quiz-wrap { padding-top: 26px; }
+}
+@media(hover:none) {
+  .card-link:hover, .desafio-card:hover { transform: none; box-shadow: 0 4px 14px #73341c14; }
+}
+/* Ajustes da identificação e das seções de estudo */
+
+/* Esconde o nome quando estiver no modo login */
+#l-nome[hidden] {
+  display: none !important;
+}
+
+/* Apresentação */
+.apresentacao-texto {
+  max-width: 72ch;
+}
+
+.apresentacao-texto p {
+  margin-bottom: 0;
+}
+
+/* Área de leitura com rolagem */
+.leitura-scroll {
+  max-height: min(68vh, 720px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 16px 12px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sol) var(--fundo);
+}
+
+.leitura-scroll p {
+  margin: 0 0 18px;
+}
+
+.leitura-scroll p:last-child {
+  margin-bottom: 0;
+}
+
+.leitura-scroll:focus-visible {
+  outline-offset: 4px;
+}
+
+/* Ajuste para celulares */
+@media(max-width:760px) {
+  .leitura-scroll {
+    max-height: 65vh;
+    padding-right: 10px;
+  }
+}

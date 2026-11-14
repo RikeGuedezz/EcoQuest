@@ -1,60 +1,183 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quiz · EcoQuest</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap"><link rel="stylesheet" href="css/style.css"></head><body><header id="topo"></header>
-<main class="wrap estreito" style="max-width:720px"><div id="raiz"></div></main>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quiz · EcoQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header id="topo"></header>
+<main class="wrap quiz-wrap">
+  <div id="raiz"></div>
+</main>
 <script type="module">
 import { supabase } from './js/supabase.js';
-import { exigirLogin } from './js/auth.js';
 import { montarCabecalho, esc } from './js/layout.js';
 import { perguntas } from './js/data.js';
-montarCabecalho();
-const sessao = await exigirLogin();
-const raiz = document.getElementById('raiz');
-let lista, i, acertos, escolha, confirmada;
 
-function iniciar() {
-  lista = [...perguntas].sort(() => Math.random() - 0.5); i = 0; acertos = 0; mostrar();
+await montarCabecalho();
+const raiz = document.getElementById('raiz');
+const params = new URLSearchParams(location.search);
+let temaSelecionado = params.get('tema');
+if (!temaSelecionado) {
+  try {
+    temaSelecionado = sessionStorage.getItem('ecoquest_tema_pendente');
+    sessionStorage.removeItem('ecoquest_tema_pendente');
+  } catch {}
 }
-function mostrar() {
-  escolha = null; confirmada = false;
-  const q = lista[i];
-  raiz.innerHTML = `<div class="cartao">
-    <p class="mini">Pergunta ${i + 1} de ${lista.length} (${q.tema})</p>
-    <div class="barra-prog"><i style="width:${(i / lista.length) * 100}%"></i></div>
-    <h2>${esc(q.p)}</h2>
-    ${q.o.map((t, k) => `<button class="op" data-k="${k}">${esc(t)}</button>`).join('')}
-    <button class="btn" id="ok" disabled>Confirmar</button></div>`;
-  const ops = raiz.querySelectorAll('.op'), ok = document.getElementById('ok');
-  ops.forEach(b => b.onclick = () => {
-    if (confirmada) return;
-    escolha = Number(b.dataset.k);
-    ops.forEach(x => x.classList.toggle('sel', x === b)); ok.disabled = false;
-  });
-  ok.onclick = () => {
-    if (!confirmada) {
-      confirmada = true;
-      ops.forEach((b, k) => { b.classList.remove('sel'); if (k === q.c) b.classList.add('certa'); else if (k === escolha) b.classList.add('errada'); });
-      if (escolha === q.c) acertos++;
-      ok.textContent = i + 1 < lista.length ? 'Próxima pergunta' : 'Ver resultado';
-    } else if (++i < lista.length) mostrar(); else finalizar();
-  };
+const desafios = {
+  Oceano: {
+    titulo: 'Desafio dos Oceanos',
+    descricao: 'Teste seus conhecimentos sobre os mares, a vida marinha e a preservação dos oceanos.',
+    icone: '🌊',
+    classe: 'oceano'
+  },
+  Mata: {
+    titulo: 'Desafio das Florestas',
+    descricao: 'Descubra o quanto você sabe sobre florestas, biodiversidade e conservação.',
+    icone: '🌳',
+    classe: 'mata'
+  },
+  Urbano: {
+    titulo: 'Desafio da Vida Urbana',
+    descricao: 'Responda questões sobre sustentabilidade nas cidades, consumo e reciclagem.',
+    icone: '🏙️',
+    classe: 'urbano'
+  }
+};
+
+function mostrarSelecao() {
+  document.title = 'Escolha seu desafio · EcoQuest';
+  raiz.innerHTML = `
+    <section class="quiz-intro">
+      <p class="mini">Escolha seu caminho</p>
+      <h1>Qual desafio você vai encarar?</h1>
+      <p>Cada desafio tem perguntas próprias. Escolha um tema para começar.</p>
+    </section>
+    <div class="grade desafios">
+      ${Object.entries(desafios).map(([tema, d]) => `
+        <a class="cartao desafio-card desafio-${d.classe}" href="quiz.html?tema=${encodeURIComponent(tema)}">
+          <div class="desafio-icone" aria-hidden="true">${d.icone}</div>
+          <div class="corpo">
+            <h2>${d.titulo}</h2>
+            <p>${d.descricao}</p>
+            <span class="card-cta">Começar desafio <span aria-hidden="true">→</span></span>
+          </div>
+        </a>`).join('')}
+    </div>`;
 }
-async function finalizar() {
-  raiz.innerHTML = '<div class="cartao"><p>Salvando seu resultado...</p></div>';
-  const total = lista.length, pontos = acertos * 10, perc = Math.round((acertos / total) * 1000) / 10;
-  const { data: perfil } = await supabase.from('profiles').select('nome').eq('id', sessao.user.id).single();
-  const { data: res, error } = await supabase.from('resultados')
-    .insert({ user_id: sessao.user.id, acertos, total, pontos, percentual: perc }).select('id').single();
-  const frase = perc >= 90 ? 'Excelente! Você demonstra ter ótimos conhecimentos ambientais.'
-    : perc >= 70 ? 'Muito bem! Você está no caminho certo.'
-    : perc >= 50 ? 'Bom esforço! Continue aprendendo.' : 'Que tal revisar os conteúdos e tentar novamente?';
-  raiz.innerHTML = `<div class="cartao"><h1>Resultado de ${esc(perfil?.nome || 'participante')}</h1>
-    <div class="placar"><div><b>${pontos}</b>pontos</div><div><b>${acertos}</b>acertos</div><div><b>${total - acertos}</b>erros</div><div><b>${perc}%</b>aproveitamento</div></div>
-    <p><b>${frase}</b></p>
-    <p id="st" style="color:var(--cobre)">${error ? 'Não foi possível salvar o resultado: ' + esc(error.message) : 'Resultado salvo. Enviando uma cópia para o seu e-mail...'}</p>
-    <button class="btn" id="de-novo">Fazer o quiz novamente</button> <a class="btn contorno" href="index.html">Voltar aos conteúdos</a></div>`;
-  document.getElementById('de-novo').onclick = iniciar;
-  if (!error) supabase.functions.invoke('enviar-resultado', { body: { resultado_id: res.id } }).then(({ error: e }) => {
-    document.getElementById('st').textContent = e ? 'Resultado salvo, mas o e-mail não pôde ser enviado agora.' : 'Enviamos uma cópia do resultado para o seu e-mail.';
-  });
+
+async function iniciarQuiz(tema, sessao) {
+  const desafio = desafios[tema];
+  document.title = desafio.titulo + ' · EcoQuest';
+  let lista = [...perguntas.filter(q => q.tema === tema)].sort(() => Math.random() - 0.5);
+  let i = 0;
+  let acertos = 0;
+  let escolha = null;
+  let confirmada = false;
+
+  if (!lista.length) {
+    raiz.innerHTML = '<div class="cartao"><h1>Este desafio ainda não tem perguntas.</h1><a class="btn" href="quiz.html">Escolher outro desafio</a></div>';
+    return;
+  }
+
+  function mostrar() {
+    escolha = null;
+    confirmada = false;
+    const q = lista[i];
+    raiz.innerHTML = `<div class="cartao">
+      <p class="mini">${desafio.titulo} · Pergunta ${i + 1} de ${lista.length}</p>
+      <div class="barra-prog"><i style="width:${(i / lista.length) * 100}%"></i></div>
+      <h2>${esc(q.p)}</h2>
+      ${q.o.map((t, k) => `<button class="op" data-k="${k}">${esc(t)}</button>`).join('')}
+      <button class="btn" id="ok" disabled>Confirmar</button>
+    </div>`;
+    const ops = raiz.querySelectorAll('.op');
+    const ok = document.getElementById('ok');
+    ops.forEach(b => b.onclick = () => {
+      if (confirmada) return;
+      escolha = Number(b.dataset.k);
+      ops.forEach(x => x.classList.toggle('sel', x === b));
+      ok.disabled = false;
+    });
+    ok.onclick = () => {
+      if (!confirmada) {
+        confirmada = true;
+        ops.forEach((b, k) => {
+          b.classList.remove('sel');
+          if (k === q.c) b.classList.add('certa');
+          else if (k === escolha) b.classList.add('errada');
+        });
+        if (escolha === q.c) acertos++;
+        ok.textContent = i + 1 < lista.length ? 'Próxima pergunta' : 'Ver resultado';
+      } else if (++i < lista.length) {
+        mostrar();
+      } else {
+        finalizar();
+      }
+    };
+  }
+
+  async function finalizar() {
+    raiz.innerHTML = '<div class="cartao"><p>Salvando seu resultado...</p></div>';
+    const total = lista.length;
+    const pontos = acertos * 10;
+    const perc = Math.round((acertos / total) * 1000) / 10;
+    const { data: perfil } = await supabase.from('profiles').select('nome').eq('id', sessao.user.id).single();
+    const { data: res, error } = await supabase.from('resultados')
+      .insert({ user_id: sessao.user.id, acertos, total, pontos, percentual: perc }).select('id').single();
+    const frase = perc >= 90 ? 'Excelente! Você demonstra ter ótimos conhecimentos ambientais.'
+      : perc >= 70 ? 'Muito bem! Você está no caminho certo.'
+      : perc >= 50 ? 'Bom esforço! Continue aprendendo.' : 'Que tal revisar os conteúdos e tentar novamente?';
+    raiz.innerHTML = `<div class="cartao">
+      <p class="mini">${desafio.titulo}</p>
+      <h1>Resultado de ${esc(perfil?.nome || 'participante')}</h1>
+      <div class="placar">
+        <div><b>${pontos}</b>pontos</div>
+        <div><b>${acertos}</b>acertos</div>
+        <div><b>${total - acertos}</b>erros</div>
+        <div><b>${perc}%</b>aproveitamento</div>
+      </div>
+      <p><b>${frase}</b></p>
+      <p id="st" class="status-resultado">${error ? 'Não foi possível salvar o resultado: ' + esc(error.message) : 'Resultado salvo. Enviando uma cópia para o seu e-mail...'}</p>
+      <button class="btn" id="de-novo">Refazer este desafio</button>
+      <a class="btn contorno" href="quiz.html">Escolher outro desafio</a>
+      <a class="btn contorno" href="index.html">Voltar aos conteúdos</a>
+    </div>`;
+    document.getElementById('de-novo').onclick = () => {
+      lista = [...perguntas.filter(q => q.tema === tema)].sort(() => Math.random() - 0.5);
+      i = 0;
+      acertos = 0;
+      mostrar();
+    };
+    if (!error) {
+      supabase.functions.invoke('enviar-resultado', { body: { resultado_id: res.id } }).then(({ error: e }) => {
+        const status = document.getElementById('st');
+        if (status) status.textContent = e
+          ? 'Resultado salvo, mas o e-mail não pôde ser enviado agora.'
+          : 'Enviamos uma cópia do resultado para o seu e-mail.';
+      });
+    }
+  }
+
+  mostrar();
 }
-iniciar();
-</script></body></html>
+
+if (!desafios[temaSelecionado]) {
+  mostrarSelecao();
+} else {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    try { sessionStorage.setItem('ecoquest_tema_pendente', temaSelecionado); } catch {}
+    location.href = 'cadastro.html?voltar=quiz.html';
+  } else {
+    try { sessionStorage.removeItem('ecoquest_tema_pendente'); } catch {}
+    iniciarQuiz(temaSelecionado, session);
+  }
+}
+</script>
+</body>
+</html>

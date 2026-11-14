@@ -12,7 +12,6 @@ export async function montarCabecalho() {
     <div class="wrap barra">
       <a class="logo" href="index.html" aria-label="EcoQuest, página inicial">🌿 Eco<span>Quest</span></a>
       <nav>
-        <a href="index.html">Conteúdos</a>
         <a href="quiz.html">Quiz</a>
         ${admin ? '<a href="admin.html">Painel</a>' : ''}
         ${session ? '<button class="link" id="sair">Sair</button>' : '<a href="cadastro.html">Entrar</a>'}
