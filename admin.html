@@ -1,30 +1,571 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel · EcoQuest</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap"><link rel="stylesheet" href="css/style.css"></head><body><header id="topo"></header>
-<main class="wrap" style="padding:30px 20px"><div id="raiz"><p>Carregando...</p></div></main>
-<script type="module">
-import { supabase } from './js/supabase.js';
-import { exigirLogin, ehAdmin } from './js/auth.js';
-import { montarCabecalho, esc } from './js/layout.js';
-montarCabecalho();
-await exigirLogin();
-const raiz = document.getElementById('raiz');
-if (await ehAdmin()) {
-  const [{ data: perfis }, { data: res }] = await Promise.all([
-    supabase.from('profiles').select('id,nome,email,criado_em').order('criado_em', { ascending: false }),
-    supabase.from('resultados').select('id,user_id,acertos,total,pontos,percentual,criado_em,profiles(nome,email)').order('criado_em', { ascending: false }),
-  ]);
-  const r = res || [], p = perfis || [];
-  const fez = new Set(r.map(x => x.user_id)).size;
-  const media = r.length ? (r.reduce((s, x) => s + Number(x.percentual), 0) / r.length).toFixed(1) : '0';
-  const melhor = {}; r.forEach(x => { if (!melhor[x.user_id] || x.pontos > melhor[x.user_id].pontos) melhor[x.user_id] = x; });
-  const ranking = Object.values(melhor).sort((a, b) => b.pontos - a.pontos).slice(0, 10);
-  const data = d => new Date(d).toLocaleString('pt-BR');
-  const tab = (cab, linhas) => `<div class="tabela"><table><thead><tr>${cab.map(c => '<th>' + c + '</th>').join('')}</tr></thead><tbody>${linhas.length ? linhas.join('') : '<tr><td colspan="9">Nada por aqui ainda.</td></tr>'}</tbody></table></div>`;
-  raiz.innerHTML = `<h1>Painel administrativo</h1>
-    <div class="placar"><div><b>${p.length}</b>cadastrados</div><div><b>${fez}</b>fizeram o quiz</div><div><b>${r.length}</b>tentativas</div><div><b>${media}%</b>média geral</div></div>
-    <div class="cartao"><h2>Ranking (10 melhores)</h2>${tab(['#', 'Nome', 'Pontos', 'Aproveitamento'], ranking.map((x, k) => `<tr><td>${k + 1}</td><td>${esc(x.profiles?.nome)}</td><td>${x.pontos}</td><td>${x.percentual}%</td></tr>`))}</div><br>
-    <div class="cartao"><h2>Participantes</h2>${tab(['Nome', 'E-mail', 'Tentativas', 'Melhor resultado', 'Cadastro'], p.map(u => { const m = melhor[u.id]; return `<tr><td>${esc(u.nome)}</td><td>${esc(u.email)}</td><td>${r.filter(x => x.user_id === u.id).length}</td><td>${m ? m.percentual + '%' : '-'}</td><td>${data(u.criado_em)}</td></tr>`; }))}</div><br>
-    <div class="cartao"><h2>Resultados individuais</h2>${tab(['Nome', 'E-mail', 'Acertos', 'Pontos', '%', 'Data'], r.map(x => `<tr><td>${esc(x.profiles?.nome)}</td><td>${esc(x.profiles?.email)}</td><td>${x.acertos}/${x.total}</td><td>${x.pontos}</td><td>${x.percentual}%</td><td>${data(x.criado_em)}</td></tr>`))}</div>`;
-} else {
-  raiz.innerHTML = '<div class="cartao"><h1>Acesso restrito</h1><p>Esta área é só para os responsáveis pelo projeto.</p></div>';
-}
-</script></body></html>
+
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>Painel Administrativo · EcoQuest</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header id="topo"></header>
+
+  <main class="wrap admin-wrap">
+    <div id="raiz">
+      <p>Carregando painel...</p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { supabase } from './js/supabase.js';
+    import { exigirLogin, ehAdmin } from './js/auth.js';
+    import { montarCabecalho, esc } from './js/layout.js';
+
+    await montarCabecalho();
+    await exigirLogin();
+
+    const raiz = document.getElementById('raiz');
+
+    const TEMAS = [
+      { id: 'Oceano', nome: 'Oceanos', icone: '🌊' },
+      { id: 'Mata', nome: 'Florestas', icone: '🌳' },
+      { id: 'Urbano', nome: 'Vida Urbana', icone: '🏙️' }
+    ];
+
+    const formatarData = (data) => {
+      if (!data) return '-';
+
+      return new Date(data).toLocaleString('pt-BR', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      });
+    };
+
+    const nota = (resultado) => {
+      if (!resultado) return null;
+
+      if (resultado.percentual !== null && resultado.percentual !== undefined) {
+        return Number(resultado.percentual);
+      }
+
+      if (resultado.total > 0) {
+        return (Number(resultado.acertos) / Number(resultado.total)) * 100;
+      }
+
+      return 0;
+    };
+
+    const formatarNota = (valor) => {
+      if (valor === null || valor === undefined) return '-';
+
+      return Number(valor).toLocaleString('pt-BR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2
+      }) + '%';
+    };
+
+    let participantes = [];
+    let resultados = [];
+    let abaAtual = 'visao';
+    let participanteSelecionado = null;
+
+    // Retorna a melhor tentativa de cada tema.
+    function obterMelhoresResultados(userId) {
+      const doUsuario = resultados.filter(
+        r => r.user_id === userId && TEMAS.some(t => t.id === r.tema)
+      );
+
+      const melhores = {};
+
+      for (const resultado of doUsuario) {
+        const atual = melhores[resultado.tema];
+
+        if (!atual || nota(resultado) > nota(atual)) {
+          melhores[resultado.tema] = resultado;
+        }
+      }
+
+      return melhores;
+    }
+
+    // Calcula a média geral somente quando os três desafios foram concluídos.
+    function obterResumo(userId) {
+      const melhores = obterMelhoresResultados(userId);
+      const quantidade = TEMAS.filter(t => melhores[t.id]).length;
+
+      const notas = TEMAS
+        .map(t => melhores[t.id] ? nota(melhores[t.id]) : null)
+        .filter(n => n !== null);
+
+      const media = quantidade === 3
+        ? notas.reduce((soma, n) => soma + n, 0) / 3
+        : null;
+
+      return {
+        melhores,
+        quantidade,
+        media
+      };
+    }
+
+    function criarTabela(cabecalhos, linhas, mensagem = 'Nenhum registro encontrado.') {
+      return `
+        <div class="tabela admin-tabela">
+          <table>
+            <thead>
+              <tr>
+                ${cabecalhos.map(c => `<th>${c}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${linhas.length
+                ? linhas.join('')
+                : `<tr><td colspan="${cabecalhos.length}" class="admin-vazio">${mensagem}</td></tr>`
+              }
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderVisaoGeral() {
+      const concluidos = participantes.filter(u =>
+        obterResumo(u.id).quantidade === 3
+      );
+
+      const mediaGeral = concluidos.length
+        ? concluidos.reduce((soma, u) => soma + obterResumo(u.id).media, 0) / concluidos.length
+        : 0;
+
+      const tentativas = resultados.filter(r =>
+        TEMAS.some(t => t.id === r.tema)
+      ).length;
+
+      return `
+        <section class="admin-secao">
+          <div class="admin-titulo">
+            <div>
+              <span class="admin-eyebrow">ECOQUEST · ADMINISTRAÇÃO</span>
+              <h1>Visão geral</h1>
+              <p>Acompanhe o desempenho e a participação dos jogadores.</p>
+            </div>
+          </div>
+
+          <div class="admin-metricas">
+            <article class="admin-metrica">
+              <span class="admin-metrica-icone">👥</span>
+              <span class="admin-metrica-label">Participantes cadastrados</span>
+              <strong>${participantes.length}</strong>
+            </article>
+
+            <article class="admin-metrica">
+              <span class="admin-metrica-icone">📝</span>
+              <span class="admin-metrica-label">Quizzes realizados</span>
+              <strong>${tentativas}</strong>
+            </article>
+
+            <article class="admin-metrica">
+              <span class="admin-metrica-icone">🏆</span>
+              <span class="admin-metrica-label">Concluíram os 3 desafios</span>
+              <strong>${concluidos.length}</strong>
+            </article>
+
+            <article class="admin-metrica">
+              <span class="admin-metrica-icone">📊</span>
+              <span class="admin-metrica-label">Média geral dos concluintes</span>
+              <strong>${formatarNota(mediaGeral)}</strong>
+            </article>
+          </div>
+
+          <div class="admin-cartao admin-resumo">
+            <div>
+              <span class="admin-eyebrow">ACOMPANHAMENTO</span>
+              <h2>Progresso dos participantes</h2>
+              <p>
+                O ranking considera apenas quem concluiu os três desafios.
+                A média geral é calculada com a melhor nota de cada desafio.
+              </p>
+            </div>
+
+            <div class="admin-progresso-total">
+              <strong>${concluidos.length}</strong>
+              <span>de ${participantes.length} participantes concluíram tudo</span>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderRanking() {
+      const ranking = participantes
+        .map(u => ({
+          usuario: u,
+          resumo: obterResumo(u.id)
+        }))
+        .filter(item => item.resumo.quantidade === 3)
+        .sort((a, b) => {
+          if (b.resumo.media !== a.resumo.media) {
+            return b.resumo.media - a.resumo.media;
+          }
+
+          return String(a.usuario.nome || '').localeCompare(
+            String(b.usuario.nome || ''),
+            'pt-BR'
+          );
+        })
+        .slice(0, 10);
+
+      const linhas = ranking.map((item, index) => {
+        const posicao = index + 1;
+
+        return `
+          <tr>
+            <td>
+              <span class="admin-posicao ${posicao <= 3 ? 'admin-top-' + posicao : ''}">
+                ${posicao}º
+              </span>
+            </td>
+            <td>
+              <strong>${esc(item.usuario.nome || 'Participante')}</strong>
+            </td>
+            <td>
+              <strong class="admin-nota-destaque">
+                ${formatarNota(item.resumo.media)}
+              </strong>
+            </td>
+            <td>
+              <button
+                class="admin-botao-link"
+                data-abrir-participante="${esc(item.usuario.id)}">
+                Ver perfil
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      return `
+        <section class="admin-secao">
+          <div class="admin-titulo">
+            <div>
+              <span class="admin-eyebrow">DESEMPENHO</span>
+              <h1>Ranking</h1>
+              <p>Os dez melhores participantes que concluíram os três desafios.</p>
+            </div>
+          </div>
+
+          <div class="admin-cartao">
+            <div class="admin-cartao-cabecalho">
+              <div>
+                <h2>Top 10 participantes</h2>
+                <p>A pontuação é a média dos três desafios.</p>
+              </div>
+              <span class="admin-etiqueta">0 a 100 pontos</span>
+            </div>
+
+            ${criarTabela(
+              ['Posição', 'Participante', 'Média geral', 'Detalhes'],
+              linhas,
+              'Ainda não há participantes que concluíram os três desafios.'
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderParticipantes() {
+      const linhas = participantes.map(u => {
+        const resumo = obterResumo(u.id);
+
+        const progresso = `${resumo.quantidade} de 3`;
+
+        const media = resumo.quantidade === 3
+          ? formatarNota(resumo.media)
+          : 'Não classificado';
+
+        return `
+          <tr class="admin-linha-clicavel"
+              data-abrir-participante="${esc(u.id)}">
+            <td>
+              <strong>${esc(u.nome || 'Participante')}</strong>
+            </td>
+            <td>${esc(u.email || '-')}</td>
+            <td>
+              <span class="admin-progresso-etiqueta">${progresso}</span>
+            </td>
+            <td>
+              <strong>${media}</strong>
+            </td>
+            <td>
+              <button class="admin-botao-link"
+                data-abrir-participante="${esc(u.id)}">
+                Ver detalhes →
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      return `
+        <section class="admin-secao">
+          <div class="admin-titulo">
+            <div>
+              <span class="admin-eyebrow">COMUNIDADE</span>
+              <h1>Participantes</h1>
+              <p>Consulte os cadastros, o progresso e os resultados individuais.</p>
+            </div>
+          </div>
+
+          <div class="admin-cartao">
+            <div class="admin-cartao-cabecalho">
+              <div>
+                <h2>Todos os participantes</h2>
+                <p>${participantes.length} cadastro(s) encontrado(s).</p>
+              </div>
+            </div>
+
+            ${criarTabela(
+              ['Nome', 'E-mail', 'Desafios concluídos', 'Média geral', 'Detalhes'],
+              linhas,
+              'Nenhum participante cadastrado.'
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderDetalhes(userId) {
+      const usuario = participantes.find(u => u.id === userId);
+
+      if (!usuario) {
+        participanteSelecionado = null;
+        return renderParticipantes();
+      }
+
+      const resumo = obterResumo(userId);
+
+      const historico = resultados
+        .filter(r => r.user_id === userId)
+        .sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+
+      const cartoesTemas = TEMAS.map(t => {
+        const melhor = resumo.melhores[t.id];
+
+        return `
+          <article class="admin-resultado-tema">
+            <span class="admin-tema-icone">${t.icone}</span>
+            <div>
+              <span class="admin-tema-nome">${t.nome}</span>
+              <strong>${melhor ? formatarNota(nota(melhor)) : 'Pendente'}</strong>
+              <small>
+                ${melhor
+                  ? `${melhor.acertos}/${melhor.total} acertos`
+                  : 'Ainda não realizado'
+                }
+              </small>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      const linhasHistorico = historico.map(r => {
+        const tema = TEMAS.find(t => t.id === r.tema);
+
+        return `
+          <tr>
+            <td>${tema ? tema.nome : 'Resultado antigo — desafio não identificado'}</td>
+            <td>${r.acertos}/${r.total}</td>
+            <td>${formatarNota(nota(r))}</td>
+            <td>${formatarData(r.criado_em)}</td>
+          </tr>
+        `;
+      });
+
+      return `
+        <section class="admin-secao">
+          <button class="admin-voltar" data-voltar-participantes>
+            ← Voltar para participantes
+          </button>
+
+          <div class="admin-titulo admin-titulo-detalhe">
+            <div>
+              <span class="admin-eyebrow">PERFIL DO PARTICIPANTE</span>
+              <h1>${esc(usuario.nome || 'Participante')}</h1>
+              <p>${esc(usuario.email || '-')}</p>
+            </div>
+          </div>
+
+          <div class="admin-detalhe-metricas">
+            <article class="admin-metrica">
+              <span class="admin-metrica-label">Desafios concluídos</span>
+              <strong>${resumo.quantidade}/3</strong>
+            </article>
+
+            <article class="admin-metrica">
+              <span class="admin-metrica-label">Média geral</span>
+              <strong>
+                ${resumo.quantidade === 3
+                  ? formatarNota(resumo.media)
+                  : 'Pendente'
+                }
+              </strong>
+            </article>
+
+            <article class="admin-metrica">
+              <span class="admin-metrica-label">Data de cadastro</span>
+              <strong class="admin-data">
+                ${formatarData(usuario.criado_em)}
+              </strong>
+            </article>
+          </div>
+
+          <div class="admin-cartao">
+            <h2>Desempenho por desafio</h2>
+            <p class="admin-descricao">
+              É considerada a maior pontuação obtida em cada desafio.
+            </p>
+
+            <div class="admin-resultados-grid">
+              ${cartoesTemas}
+            </div>
+          </div>
+
+          <div class="admin-cartao admin-historico">
+            <h2>Histórico de resultados</h2>
+            <p class="admin-descricao">
+              Todas as tentativas registradas para este participante.
+            </p>
+
+            ${criarTabela(
+              ['Desafio', 'Acertos', 'Aproveitamento', 'Data'],
+              linhasHistorico,
+              'Este participante ainda não possui resultados.'
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function render() {
+      let conteudo = '';
+
+      if (participanteSelecionado) {
+        conteudo = renderDetalhes(participanteSelecionado);
+      } else if (abaAtual === 'visao') {
+        conteudo = renderVisaoGeral();
+      } else if (abaAtual === 'ranking') {
+        conteudo = renderRanking();
+      } else {
+        conteudo = renderParticipantes();
+      }
+
+      raiz.innerHTML = `
+        <nav class="admin-navegacao">
+          <button class="${abaAtual === 'visao' ? 'ativo' : ''}"
+            data-aba="visao">
+            <span>▦</span> Visão geral
+          </button>
+
+          <button class="${abaAtual === 'ranking' ? 'ativo' : ''}"
+            data-aba="ranking">
+            <span>🏆</span> Ranking
+          </button>
+
+          <button class="${abaAtual === 'participantes' ? 'ativo' : ''}"
+            data-aba="participantes">
+            <span>👥</span> Participantes
+          </button>
+        </nav>
+
+        ${conteudo}
+      `;
+    }
+
+    async function carregarDados() {
+      const [
+        { data: perfis, error: erroPerfis },
+        { data: res, error: erroResultados }
+      ] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('id,nome,email,criado_em')
+          .order('criado_em', { ascending: false }),
+
+        supabase
+          .from('resultados')
+          .select('id,user_id,tema,acertos,total,pontos,percentual,criado_em')
+          .order('criado_em', { ascending: false })
+      ]);
+
+      if (erroPerfis || erroResultados) {
+        console.error(erroPerfis || erroResultados);
+
+        raiz.innerHTML = `
+          <div class="admin-cartao">
+            <h1>Não foi possível carregar o painel</h1>
+            <p>Verifique a conexão com o Supabase e as permissões de administrador.</p>
+            <button class="admin-botao" id="tentar-novamente">
+              Tentar novamente
+            </button>
+          </div>
+        `;
+
+        return;
+      }
+
+      participantes = perfis || [];
+      resultados = res || [];
+
+      render();
+    }
+
+    // Eventos das abas e dos detalhes.
+    raiz.addEventListener('click', (event) => {
+      const aba = event.target.closest('[data-aba]');
+
+      if (aba) {
+        participanteSelecionado = null;
+        abaAtual = aba.dataset.aba;
+        render();
+        return;
+      }
+
+      const abrir = event.target.closest('[data-abrir-participante]');
+
+      if (abrir) {
+        participanteSelecionado = abrir.dataset.abrirParticipante;
+        abaAtual = 'participantes';
+        render();
+        return;
+      }
+
+      if (event.target.closest('[data-voltar-participantes]')) {
+        participanteSelecionado = null;
+        abaAtual = 'participantes';
+        render();
+        return;
+      }
+
+      if (event.target.closest('#tentar-novamente')) {
+        carregarDados();
+      }
+    });
+
+    if (await ehAdmin()) {
+      await carregarDados();
+    } else {
+      raiz.innerHTML = `
+        <div class="admin-cartao">
+          <h1>Acesso restrito</h1>
+          <p>Esta área é exclusiva para os responsáveis pelo projeto.</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

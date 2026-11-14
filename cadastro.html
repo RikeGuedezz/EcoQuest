@@ -40,7 +40,7 @@
           required
           minlength="3"
           autocomplete="name"
-        >
+  >
       </label>
 
       <label>
@@ -99,12 +99,17 @@ function aba(m) {
   $('aba-novo').classList.toggle('ativa', m === 'novo');
   $('aba-login').classList.toggle('ativa', m === 'login');
 
+  // Esconde o campo de nome durante o login
   $('l-nome').hidden = m === 'login';
+
+  // O nome só é obrigatório no cadastro
   $('nome').required = m === 'novo';
 
+  // Altera o preenchimento automático da senha
   $('senha').autocomplete =
     m === 'novo' ? 'new-password' : 'current-password';
 
+  // Altera o texto do botão
   $('b1').textContent =
     m === 'novo' ? 'Criar conta' : 'Entrar';
 
@@ -113,7 +118,6 @@ function aba(m) {
 $('aba-novo').onclick = () => aba('novo');
 $('aba-login').onclick = () => aba('login');
 
-// Cadastro e login
 $('f1').onsubmit = async (e) => {
 
   e.preventDefault();
@@ -133,34 +137,29 @@ $('f1').onsubmit = async (e) => {
         return msg('Digite seu nome completo.');
       }
 
+      // Cadastro
       const { data, error } = await supabase.auth.signUp({
-
         email,
         password: senha,
-
         options: {
           data: { nome }
         }
-
       });
 
       if (error) throw error;
 
       if (!data.session) {
-        return msg(
-          'Conta criada, mas não foi possível iniciar a sessão. Confira a configuração de confirmação de e-mail no Supabase.'
-        );
+        return msg('Conta criada, mas não foi possível iniciar a sessão. Confira a configuração de confirmação de e-mail no Supabase.');
       }
 
       msg('Cadastro realizado com sucesso!', true);
 
     } else {
 
+      // Login: somente e-mail e senha
       const { error } = await supabase.auth.signInWithPassword({
-
         email,
         password: senha
-
       });
 
       if (error) throw error;
@@ -193,9 +192,7 @@ $('f1').onsubmit = async (e) => {
     }
 
   } finally {
-
     $('b1').disabled = false;
-
   }
 
 };

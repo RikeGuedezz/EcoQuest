@@ -47,7 +47,17 @@ if (!c) {
              allowfullscreen></iframe>
          </div>`
       : `<h2>Vídeo aula</h2><p> ainda não há uma videoaula selecionada para este conteúdo. Volte em outro momento para conferir as novidades.</p>`,
-    leitura: () => `<h2>Leitura</h2>${c.leitura.map(p => '<p>' + esc(p) + '</p>').join('')}`,
+    leitura: () => `
+  <h2>Leitura</h2>
+
+  <div
+    class="leitura-scroll"
+    tabindex="0"
+    aria-label="Conteúdo completo para leitura"
+  >
+    ${c.leitura.map(p => '<p>' + esc(p) + '</p>').join('')}
+  </div>
+`,
   };
   const botoes = document.querySelectorAll('.lateral button');
   function ir(s) {
