@@ -10,6 +10,21 @@ Este é o repositório do projeto **EcoQuest**, um site sobre sustentabilidade d
 2. **Banco de Dados Conectado:** A estrutura de tabelas (`schema.sql`) já foi criada no banco de dados central.
 3. **Chaves de Acesso:** O arquivo `js/supabase.js` já está configurado com as credenciais do projeto. **Não altere este arquivo**, ele conecta o site de todos ao mesmo banco de dados centralizado.
 
+## 🆕 Últimas Atualizações
+
+**Atualização — Novembro de 2026**
+
+O EcoQuest recebeu melhorias na navegação, organização dos conteúdos e experiência do usuário.
+
+- **Login:** remoção do campo de nome, mantendo apenas e-mail e senha.
+- **Navegação:** remoção de opções redundantes do menu, como "Conteúdos".
+- **Cards de estudo:** agora são totalmente clicáveis e possuem animações de profundidade.
+- **Categorias:** identificação dos conteúdos por Oceanos, Florestas e Meio Urbano.
+- **Quizzes:** criação de opções de desafios separados por categoria.
+- **Vídeo aulas:** incorporação de vídeos diretamente nas páginas de estudo.
+- **Apresentação:** substituição do botão de link por uma prévia textual do conteúdo.
+- **Leitura:** melhorias na exibição de textos extensos, com rolagem vertical.
+
 ---
 
 ## 🚀 Como Rodar o Projeto no seu Computador
