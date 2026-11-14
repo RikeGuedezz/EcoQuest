@@ -12,7 +12,7 @@ Este é o repositório do projeto **EcoQuest**, um site sobre sustentabilidade d
 
 ## 🆕 Últimas Atualizações
 
-**Atualização — Novembro de 2026**
+**Atualização — 13 de Novembro de 2026**
 
 O EcoQuest recebeu melhorias na navegação, organização dos conteúdos e experiência do usuário.
 
