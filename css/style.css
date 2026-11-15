@@ -628,3 +628,75 @@ footer{text-align:center;padding:30px;color:var(--terra);font-size:.9rem}
     font-size: 1.8rem;
   }
 }
+
+/* ===== NOVO PADRÃO DE CONTEÚDOS ===== */
+
+.video-fonte,
+.leitura-fonte {
+  margin-top: 16px;
+  color: #71685b;
+  font-size: .9rem;
+}
+
+.video-descricao {
+  margin-top: 22px;
+  padding: 18px;
+  background: var(--fundo);
+  border-radius: 14px;
+}
+
+.video-descricao h3,
+.leitura-secao h3 {
+  color: var(--agua);
+  font-family: 'Fraunces', serif;
+  margin-bottom: 12px;
+}
+
+.video-descricao p,
+.leitura-secao p {
+  line-height: 1.8;
+}
+
+.leitura-secao {
+  margin-bottom: 28px;
+}
+
+.leitura-secao h3 {
+  margin-top: 24px;
+}
+
+.leitura-observacao {
+  margin-top: 25px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(115, 52, 28, .18);
+  color: #71685b;
+  font-size: .9rem;
+}
+
+.leitura-link a {
+  color: var(--cobre);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.leitura-link a:hover {
+  color: var(--terra);
+}
+
+/* ===== FEEDBACK DAS PERGUNTAS DO QUIZ ===== */
+
+.feedback-quiz {
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: var(--palha);
+  border-left: 4px solid var(--mata);
+  border-radius: 12px;
+  color: var(--terra);
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+.feedback-quiz[hidden] {
+  display: none;
+}

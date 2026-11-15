@@ -1,72 +1,237 @@
+
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+
   <title>Conteúdo · EcoQuest</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap">
+
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Nunito:wght@400;700;800&display=swap">
+
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+
 <header id="topo"></header>
+
 <main class="wrap conteudo">
+
   <aside class="lateral" aria-label="Seções do conteúdo">
     <button data-s="apresentacao" class="ativa">Apresentação</button>
     <button data-s="video">Vídeo aula</button>
     <button data-s="leitura">Leitura</button>
-    <a class="btn contorno" href="index.html" style="text-align:center">Voltar</a>
+
+    <a class="btn contorno" href="index.html" style="text-align:center">
+      Voltar
+    </a>
   </aside>
+
   <section class="cartao" id="area"></section>
+
 </main>
+
 <script type="module">
+
 import { montarCabecalho, esc } from './js/layout.js';
 import { cards } from './js/data.js';
 
 await montarCabecalho();
-const c = cards.find(x => x.id === Number(new URLSearchParams(location.search).get('id')));
+
+const parametros = new URLSearchParams(location.search);
+
+const id = Number(parametros.get('id'));
+
+const c = cards.find(card => card.id === id);
+
 if (!c) {
+
   location.replace('index.html');
+
 } else {
+
   document.title = c.titulo + ' · EcoQuest';
-  const secoes = {
-    apresentacao: () => `
-  <h1>${c.icone} ${esc(c.titulo)}</h1>
 
-  <div class="apresentacao-texto">
-    <p>${esc(c.apresentacao)}</p>
-  </div>
-`,
-    video: () => c.videoId
-      ? `<h2>Vídeo aula</h2>
-         <div class="video">
-           <iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(c.videoId)}"
-             title="Vídeo aula: ${esc(c.titulo)}" loading="lazy"
-             referrerpolicy="strict-origin-when-cross-origin"
-             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-             allowfullscreen></iframe>
-         </div>`
-      : `<h2>Vídeo aula</h2><p> ainda não há uma videoaula selecionada para este conteúdo. Volte em outro momento para conferir as novidades.</p>`,
-    leitura: () => `
-  <h2>Leitura</h2>
+  const area = document.getElementById('area');
 
-  <div
-    class="leitura-scroll"
-    tabindex="0"
-    aria-label="Conteúdo completo para leitura"
-  >
-    ${c.leitura.map(p => '<p>' + esc(p) + '</p>').join('')}
-  </div>
-`,
-  };
   const botoes = document.querySelectorAll('.lateral button');
-  function ir(s) {
-    botoes.forEach(b => b.classList.toggle('ativa', b.dataset.s === s));
-    document.getElementById('area').innerHTML = secoes[s]();
+
+
+  // ===== APRESENTAÇÃO =====
+
+  function mostrarApresentacao() {
+
+    return `
+      <h1>${esc(c.icone)} ${esc(c.titulo)}</h1>
+
+      <div class="apresentacao-texto">
+        <p>${esc(c.apresentacao || 'Conteúdo em atualização.')}</p>
+      </div>
+    `;
+
   }
-  botoes.forEach(b => b.onclick = () => ir(b.dataset.s));
+
+
+  // ===== VÍDEO AULA =====
+
+  function mostrarVideo() {
+
+    const video = c.video || {};
+
+    if (!video.videoId) {
+
+      return `
+        <h2>Vídeo aula</h2>
+
+        <p>
+          Ainda não há uma videoaula selecionada para este conteúdo.
+          Volte em outro momento para conferir as novidades.
+        </p>
+      `;
+
+    }
+
+    return `
+      <h2>${esc(video.titulo || 'Vídeo aula')}</h2>
+
+      <div class="video">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(video.videoId)}"
+          title="${esc(video.titulo || c.titulo)}"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      ${video.fonte ? `
+        <p class="video-fonte">
+          <strong>Fonte:</strong> ${esc(video.fonte)}
+        </p>
+      ` : ''}
+
+      ${video.descricao ? `
+        <div class="video-descricao">
+          <h3>Sobre o conteúdo</h3>
+          <p>${esc(video.descricao)}</p>
+        </div>
+      ` : ''}
+    `;
+
+  }
+
+
+  // ===== LEITURA =====
+
+  function mostrarLeitura() {
+
+    const leitura = c.leitura || {};
+
+    const secoes = leitura.secoes || [];
+
+    return `
+      <h2>${esc(leitura.titulo || 'Leitura')}</h2>
+
+      <div
+        class="leitura-scroll"
+        tabindex="0"
+        aria-label="Conteúdo completo para leitura"
+      >
+
+        ${secoes.map(secao => `
+
+          <section class="leitura-secao">
+
+            ${secao.subtitulo ? `
+              <h3>${esc(secao.subtitulo)}</h3>
+            ` : ''}
+
+            ${(secao.paragrafos || []).map(paragrafo => `
+              <p>${esc(paragrafo)}</p>
+            `).join('')}
+
+          </section>
+
+        `).join('')}
+
+        ${leitura.observacao ? `
+          <p class="leitura-observacao">
+            <em>${esc(leitura.observacao)}</em>
+          </p>
+        ` : ''}
+
+        ${leitura.fonte ? `
+          <p class="leitura-fonte">
+            <strong>Fonte:</strong> ${esc(leitura.fonte)}
+          </p>
+        ` : ''}
+
+        ${leitura.url ? `
+          <p class="leitura-link">
+            <a href="${esc(leitura.url)}" target="_blank" rel="noopener noreferrer">
+              Acessar fonte original
+            </a>
+          </p>
+        ` : ''}
+
+      </div>
+    `;
+
+  }
+
+
+  // ===== NAVEGAÇÃO ENTRE AS ABAS =====
+
+  const secoes = {
+
+    apresentacao: mostrarApresentacao,
+    video: mostrarVideo,
+    leitura: mostrarLeitura
+
+  };
+
+
+  function ir(secao) {
+
+    if (!secoes[secao]) return;
+
+    botoes.forEach(botao => {
+
+      botao.classList.toggle(
+        'ativa',
+        botao.dataset.s === secao
+      );
+
+    });
+
+    area.innerHTML = secoes[secao]();
+
+  }
+
+
+  botoes.forEach(botao => {
+
+    botao.addEventListener('click', () => {
+
+      ir(botao.dataset.s);
+
+    });
+
+  });
+
+
+  // Abre inicialmente na apresentação.
   ir('apresentacao');
+
 }
+
 </script>
+
 </body>
 </html>

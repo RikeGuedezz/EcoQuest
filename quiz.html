@@ -73,7 +73,7 @@ function mostrarSelecao() {
 async function iniciarQuiz(tema, sessao) {
   const desafio = desafios[tema];
   document.title = desafio.titulo + ' · EcoQuest';
-  let lista = [...perguntas.filter(q => q.tema === tema)].sort(() => Math.random() - 0.5);
+  let lista = [...(perguntas[tema] || [])].sort(() => Math.random() - 0.5);
   let i = 0;
   let acertos = 0;
   let escolha = null;
@@ -92,8 +92,11 @@ async function iniciarQuiz(tema, sessao) {
       <p class="mini">${desafio.titulo} · Pergunta ${i + 1} de ${lista.length}</p>
       <div class="barra-prog"><i style="width:${(i / lista.length) * 100}%"></i></div>
       <h2>${esc(q.p)}</h2>
-      ${q.o.map((t, k) => `<button class="op" data-k="${k}">${esc(t)}</button>`).join('')}
-      <button class="btn" id="ok" disabled>Confirmar</button>
+     ${q.o.map((t, k) => `<button class="op" data-k="${k}">${esc(t)}</button>`).join('')}
+
+    <div id="feedback-quiz" class="feedback-quiz" hidden></div>
+
+    <button class="btn" id="ok" disabled>Confirmar</button>
     </div>`;
     const ops = raiz.querySelectorAll('.op');
     const ok = document.getElementById('ok');
@@ -112,6 +115,15 @@ async function iniciarQuiz(tema, sessao) {
           else if (k === escolha) b.classList.add('errada');
         });
         if (escolha === q.c) acertos++;
+
+        // Exibe o comentário da questão, quando existir.
+        const feedback = document.getElementById('feedback-quiz');
+
+        if (q.explicacao) {
+          feedback.textContent = q.explicacao;
+          feedback.hidden = false;
+        }
+
         ok.textContent = i + 1 < lista.length ? 'Próxima pergunta' : 'Ver resultado';
       } else if (++i < lista.length) {
         mostrar();
@@ -159,7 +171,7 @@ async function iniciarQuiz(tema, sessao) {
       <a class="btn contorno" href="index.html">Voltar aos conteúdos</a>
     </div>`;
     document.getElementById('de-novo').onclick = () => {
-      lista = [...perguntas.filter(q => q.tema === tema)].sort(() => Math.random() - 0.5);
+      lista = [...(perguntas[tema] || [])].sort(() => Math.random() - 0.5);
       i = 0;
       acertos = 0;
       mostrar();
