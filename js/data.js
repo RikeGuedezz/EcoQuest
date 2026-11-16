@@ -230,7 +230,7 @@ export const cards = [
     titulo: 'Poluição e seus impactos',
     videoId: 'szR2M5QYPXk',
     fonte: 'YouTube',
-    descricao: 'Vídeo complementar sobre poluição e seus impactos.'
+    descricao: 'Veja e entenda os tipos de poluições existentes e como afetam o meio ambiente'
   },
 
   leitura: {
@@ -324,46 +324,124 @@ export const cards = [
 
     fonte: 'BASSI, Ana; NOBRES, Juirana (2024) — G1. GUITARRARA, Paloma (2026) — Brasil Escola. MENDONÇA, Gustavo Henrique (2026) — Brasil Escola. NOBRE, Carlos; ARIEIRA, Julia; BRANDÃO, Diego (2025) — SciELO. Referências completas e links no material original.',
 
-    url: 'https://brasilescola.uol.com.br/geografia/tipos-poluicao.htm'
+    url: 'https://brasilescola.uol.com.br/geografia/tipos-poluicao.htm',
+    
+    linksFontes: [
+      {
+        titulo: 'G1 — Metais do desastre de Mariana chegam às baleias no litoral (2024)',
+        url: 'https://g1.globo.com/es/espirito-santo/norte-noroeste-es/noticia/2024/09/11/apos-9-anos-metais-do-desastre-de-mariana-chegam-as-baleias-no-litoral-desastre-continua-acontecendo-diz-pesquisador.ghtml'
+      },
+      {
+        titulo: 'Brasil Escola — Tipos de poluição (2026)',
+        url: 'https://brasilescola.uol.com.br/geografia/tipos-poluicao.htm'
+      },
+      {
+        titulo: 'Brasil Escola — Poluição do ar ou atmosférica (2026)',
+        url: 'https://brasilescola.uol.com.br/biologia/poluicao-atmosferica.htm'
+      },
+      {
+        titulo: 'Brasil Escola — Camada de ozônio (2026)',
+        url: 'https://brasilescola.uol.com.br/geografia/camada-de-ozonio.htm'
+      },
+      {
+        titulo: 'SciELO — Amazônia em risco e a COP30 (2025)',
+        url: 'https://www.scielo.br/j/ea/a/XXhv84McGLwFnksQsTgMkrS/?format=html&lang=pt&ilang=pt_BR'
+      }
+],
+
+  
   }
 },
 
 
-  // ===== CARD 5 =====
-  {
-    id: 5,
-    tema: 'urbano',
-    icone: '♻️',
-    titulo: 'Reciclagem e coleta seletiva',
-    descricao: 'Separar o lixo do jeito certo.',
+  
+// ===== CARD 5 =====
+{
+  id: 5,
+  tema: 'urbano',
+  icone: '♻️',
+  titulo: 'Reciclagem e coleta seletiva',
+  descricao: 'Entenda como funciona a coleta seletiva e sua importância para o meio ambiente.',
 
-    apresentacao: 'Reciclar transforma resíduos em novos produtos, poupa recursos naturais e gera renda.',
+  apresentacao: 'Nesse tópico você entenderá os processos da coleta seletiva e a importância dela para o meio ambiente.',
 
-    video: {
-      titulo: '',
-      videoId: '',
-      fonte: '',
-      descricao: ''
-    },
-
-    leitura: {
-      titulo: 'Reciclagem e coleta seletiva',
-
-      secoes: [
-        {
-          subtitulo: '',
-          paragrafos: [
-            'Na coleta seletiva, papel, plástico, vidro e metal são separados do lixo orgânico e dos rejeitos.',
-            'Antes de reciclar, vale seguir os três Rs: reduzir, reutilizar e só depois reciclar.'
-          ]
-        }
-      ],
-
-      observacao: '',
-      fonte: '',
-      url: ''
-    }
+  video: {
+    titulo: 'Como funciona o processo da coleta seletiva?',
+    videoId: '1zJd9xcYl_o',
+    fonte: 'YouTube',
+    descricao: 'Entenda como funciona todo o processo da coleta seletiva.'
   },
+
+  leitura: {
+    titulo: 'Reciclagem e coleta seletiva',
+
+    secoes: [
+      {
+        subtitulo: 'O que é coleta seletiva?',
+        paragrafos: [
+          'A coleta seletiva é o processo de separação dos resíduos sólidos de acordo com o seu material de origem, que pode ser papel, plástico, metal ou vidro.',
+
+          'Essa prática deve ser realizada individualmente, em conjunto com o envolvimento dos municípios responsáveis pela coleta de resíduos de cada cidade. Para isso, é importante consultar o site da prefeitura do seu município e verificar como está definido o plano de coleta e separação dos resíduos.',
+
+          'Uma das formas de organizar esse processo é por meio da implementação de lixeiras coloridas em espaços públicos. Cada cor representa um tipo de material: amarelo para metal, verde para vidro, azul para papel, vermelho para plástico, marrom para resíduos orgânicos, como cascas de banana, e branco para resíduos não recicláveis.'
+        ]
+      },
+
+      {
+        subtitulo: 'Separação e reaproveitamento dos resíduos',
+        paragrafos: [
+          'Depois da separação adequada, os resíduos são analisados para identificar quais materiais poderão ser reaproveitados e quais, infelizmente, não poderão ser reciclados, sendo destinados aos aterros sanitários.',
+
+          'A coleta seletiva consegue reduzir o consumo e a retirada de recursos naturais, já que o reaproveitamento de materiais costuma ser mais viável em relação aos impactos ambientais.',
+
+          'Porém, muitas empresas e indústrias não possuem um plano bem definido para o ciclo completo de seus produtos. Isso provoca falhas na destinação final dos resíduos, que acabam sendo descartados diretamente em aterros sanitários, sem a devida separação ou possibilidade de reaproveitamento.'
+        ]
+      },
+
+      {
+        subtitulo: 'Etapas da coleta seletiva',
+        paragrafos: [
+          'O processo de coleta seletiva ocorre por meio de diferentes etapas, desde a identificação dos resíduos até a fabricação de novos produtos.',
+
+          '1. Identificação dos resíduos: reconhecimento dos materiais que serão descartados.',
+
+          '2. Separação dos resíduos: organização dos materiais de acordo com sua origem, como papel, plástico, metal e vidro.',
+
+          '3. Descontaminação: eliminação de agentes nocivos e preparação dos materiais para o reaproveitamento.',
+
+          '4. Produção de matéria-prima: transformação dos materiais reciclados em matéria-prima que poderá ser utilizada novamente.',
+
+          '5. Criação de novos produtos: utilização da matéria-prima reciclada na fabricação de novos produtos.'
+        ]
+      },
+
+      {
+        subtitulo: 'Os 3 Rs da sustentabilidade',
+        paragrafos: [
+          'Com a coleta seletiva e o reaproveitamento dos materiais, podemos colocar em prática o famoso princípio dos 3 Rs: reduzir, reutilizar e reciclar.',
+
+          'Reduzir significa diminuir o consumo e a quantidade de resíduos produzidos. Reutilizar consiste em aproveitar novamente materiais e objetos, evitando seu descarte. Reciclar é transformar materiais descartados em matéria-prima para a fabricação de novos produtos.',
+
+          'Essas práticas favorecem a preservação dos recursos naturais e ajudam a reduzir os impactos ambientais provocados pelo acúmulo e descarte inadequado do lixo.'
+        ]
+      }
+    ],
+
+    observacao: 'A coleta seletiva depende tanto da participação da população quanto da organização dos municípios e das empresas. Separar corretamente os resíduos é uma atitude importante para contribuir com a preservação ambiental.',
+
+    fonte: 'GUITARRARA, Paloma. Coleta seletiva em casa. Brasil Escola.',
+
+    url: 'https://brasilescola.uol.com.br/biologia/coleta-seletiva-casa.htm',
+
+    linksFontes: [
+      {
+        titulo: 'Brasil Escola — Coleta seletiva em casa',
+        url: 'https://brasilescola.uol.com.br/biologia/coleta-seletiva-casa.htm'
+      }
+    ]
+  }
+},
+
 
   // ===== CARD 6 =====
   {

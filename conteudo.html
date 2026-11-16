@@ -135,6 +135,10 @@ if (!c) {
 
     const secoes = leitura.secoes || [];
 
+    const linksFontes = Array.isArray(leitura.linksFontes)
+    ? leitura.linksFontes
+    : [];
+
     return `
       <h2>${esc(leitura.titulo || 'Leitura')}</h2>
 
@@ -166,20 +170,39 @@ if (!c) {
           </p>
         ` : ''}
 
-        ${leitura.fonte ? `
+        
+        ${linksFontes.length ? `
+          <div class="leitura-fonte">
+            <strong>Fontes e referências:</strong>
+
+            <ul class="leitura-fontes-lista">
+              ${linksFontes.map(fonte => `
+                <li>
+                  <a
+                    href="${esc(fonte.url)}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    ${esc(fonte.titulo)}
+                  </a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        ` : leitura.fonte ? `
           <p class="leitura-fonte">
             <strong>Fonte:</strong> ${esc(leitura.fonte)}
           </p>
         ` : ''}
 
-        ${leitura.url ? `
+        ${leitura.url && !linksFontes.length ? `
           <p class="leitura-link">
             <a href="${esc(leitura.url)}" target="_blank" rel="noopener noreferrer">
               Acessar fonte original
             </a>
           </p>
         ` : ''}
-
+        
       </div>
     `;
 
