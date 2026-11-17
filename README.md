@@ -61,9 +61,7 @@ Para que um novo colega consiga fazer login no painel `admin.html` do site, o e-
 Para testar o fluxo de login no ambiente local:
 1. Acesse a página `cadastro.html` pelo navegador rodando o Live Server.
 2. Insira o seu e-mail (que deve estar previamente cadastrado na tabela `admins` do Supabase).
-3. Verifique a sua caixa de entrada de e-mail para pegar o código de acesso enviado pelo Supabase.
-4. Digite o código na tela do site para validar o seu acesso.
-
+   
 ---
 
 ## 📂 Organização dos Arquivos
