@@ -142,7 +142,7 @@ async function iniciarQuiz(tema, sessao) {
     // Percentual de acertos, com uma casa decimal.
     const perc = Math.round((acertos / total) * 1000) / 10;
     const { data: perfil } = await supabase.from('profiles').select('nome').eq('id', sessao.user.id).single();
-    const { data: res, error } = await supabase.from('resultados')
+    const { error } = await supabase.from('resultados')
       .insert({
         user_id: sessao.user.id,
         tema,
@@ -150,8 +150,7 @@ async function iniciarQuiz(tema, sessao) {
         total,
         pontos,
         percentual: perc
-      })
-.select('id').single();
+      });
     const frase = perc >= 90 ? 'Excelente! Você demonstra ter ótimos conhecimentos ambientais.'
       : perc >= 70 ? 'Muito bem! Você está no caminho certo.'
       : perc >= 50 ? 'Bom esforço! Continue aprendendo.' : 'Que tal revisar os conteúdos e tentar novamente?';
@@ -165,7 +164,7 @@ async function iniciarQuiz(tema, sessao) {
         <div><b>${perc}%</b>aproveitamento</div>
       </div>
       <p><b>${frase}</b></p>
-      <p id="st" class="status-resultado">${error ? 'Não foi possível salvar o resultado: ' + esc(error.message) : 'Resultado salvo. Enviando uma cópia para o seu e-mail...'}</p>
+     <p id="st" class="status-resultado">${error ? 'Não foi possível salvar o resultado: ' + esc(error.message) : 'Resultado salvo com sucesso!'}</p>
       <button class="btn" id="de-novo">Refazer este desafio</button>
       <a class="btn contorno" href="quiz.html">Escolher outro desafio</a>
       <a class="btn contorno" href="index.html">Voltar aos conteúdos</a>
@@ -176,14 +175,6 @@ async function iniciarQuiz(tema, sessao) {
       acertos = 0;
       mostrar();
     };
-    if (!error) {
-      supabase.functions.invoke('enviar-resultado', { body: { resultado_id: res.id } }).then(({ error: e }) => {
-        const status = document.getElementById('st');
-        if (status) status.textContent = e
-          ? 'Resultado salvo, mas o e-mail não pôde ser enviado agora.'
-          : 'Enviamos uma cópia do resultado para o seu e-mail.';
-      });
-    }
   }
 
   mostrar();

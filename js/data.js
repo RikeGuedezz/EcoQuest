@@ -25,10 +25,10 @@ export const cards = [
     apresentacao: 'Os oceanos são imensos corpos de água salgada. Constituem mais de 97% de toda a água do planeta e ocupam aproximadamente 70% de sua superfície, sendo essenciais para regular o clima e manter o equilíbrio da vida. A água oceânica possui cerca de 3,5% de sal. Os oceanos ajudam a absorver o calor do Sol e a distribuí-lo pela atmosfera e pelo mundo por meio das correntes marítimas.',
 
     video: {
-      titulo: '15 curiosidades sobre o fundo do mar',
-      videoId: '8Yf5MLY3hyM',
-      fonte: 'Você Sabia? — canal oficial no YouTube.',
-      descricao: 'Vídeo que apresenta 15 curiosidades sobre o fundo do mar, explorando características, fenômenos e aspectos surpreendentes dos oceanos.'
+      titulo: 'A IMPORTÂNCIA de CUIDAR dos nossos MARES e OCEANOS',
+      videoId: 'AlGVqAXqBLw',
+      fonte: 'Nossa Ecologia — canal oficial no YouTube.',
+      descricao: ' Por que devemos CUIDAR dos OCEANOS? Quão IMPORTANTE é PRESERVAR o MAR? Neste vídeo da NossaEcologia, queremos falar sobre a IMPORTÂNCIA de CUIDAR dos nossos MARES e OCEANOS e explicar algumas razões vitais pelas quais devemos tomar medidas para preservar nossos mares e oceanos. Nossos mares e oceanos são tesouros inestimavelmente preciosos que sustentam a vida em nosso planeta. No entanto, apesar de sua imensa importância, estão ameaçados por diversas atividades humanas e pela mudança climática. É fundamental que todos compreendamos a urgente necessidade de cuidar e proteger esses vastos ecossistemas aquáticos.'
     },
 
     leitura: {
